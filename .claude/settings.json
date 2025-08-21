@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pyright)",
+      "Bash(uv run ruff check --fix)",
+      "Bash(uv run -- ruff:*)",
+      "Bash(uv run black --line-length=120 --target-version=py312)",
+      "Bash(uv run pytest tests)",
+      "Bash(uv run -- pytest:*)",
+      "Bash(uv run -- pyright:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(npm run test:*)",
+      "Bash(uv run -- python -B -m pytest:*)",
+      "Bash(make ci)",
+      "Bash(npm run lint)",
+      "Bash(npm run build)"
+    ],
+    "deny": [
+    ]
+  }
+}
