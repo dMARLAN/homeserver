@@ -38,7 +38,7 @@ docker-compose*.yml
 
 # Documentation
 *.md
-!README.md
+!k8s/media-server/README.md
 
 # Logs
 *.log
