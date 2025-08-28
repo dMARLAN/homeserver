@@ -5,23 +5,24 @@ A complete media server stack running on Kubernetes with automatic media managem
 ## Media Server Stack
 
 ### Components
-- **Jellyfin** - Media streaming server (like Plex)
+- **Jellyfin** - Media streaming server
 - **Jellyseerr** - Request management system with mobile-friendly interface
-- **Radarr** - Automatic movie downloading and management
-- **Sonarr** - Automatic TV show downloading and management  
-- **Prowlarr** - Indexer manager (finds content sources)
+- **Radarr** - Movie download manager
+- **Sonarr** - TV download manager 
+- **Prowlarr** - Indexer manager
+- **FlareSolverr** - Cloudflare proxy
 
 ### Directory Structure
 All media server components are organized under `/mnt/media-server/`:
 ```
 /mnt/media-server/
-├── media/            # Shared media library (movies, TV shows)
-├── downloads/        # Download staging area
-├── jellyfin/config/  # Jellyfin configuration
+├── media/             # Shared media library (movies, TV shows)
+├── downloads/         # Download staging area
+├── jellyfin/config/   # Jellyfin configuration
 ├── jellyseerr/config/ # Jellyseerr configuration
-├── radarr/config/    # Radarr configuration
-├── sonarr/config/    # Sonarr configuration
-└── prowlarr/config/  # Prowlarr configuration
+├── radarr/config/     # Radarr configuration
+├── sonarr/config/     # Sonarr configuration
+└── prowlarr/config/   # Prowlarr configuration
 ```
 
 ### Deployment/Management
