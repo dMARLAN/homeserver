@@ -16,50 +16,50 @@ spec:
         app: qbittorrent
     spec:
       containers:
-      - name: qbittorrent
-        image: ghcr.io/linuxserver/qbittorrent:latest
-        ports:
-        - containerPort: 8080
-          name: webui
-        - containerPort: 6881
-          name: torrent-tcp
-          protocol: TCP
-        - containerPort: 6881
-          name: torrent-udp
-          protocol: UDP
-        env:
-        - name: PUID
-          value: "1000"
-        - name: PGID
-          value: "1000"
-        - name: TZ
-          value: "UTC"
-        - name: WEBUI_PORT
-          value: "8080"
-        - name: QBITTORRENT_WEBUI_BYPASS_LOCAL_AUTH
-          value: "true"
-        - name: QBITTORRENT_WEBUI_HOST_HEADER_VALIDATION
-          value: "false"
-        - name: QBT_WEBUI_CSRF_PROTECTION
-          value: "false"
-        - name: QBT_WEBUI_SECURE_COOKIE
-          value: "false"
-        volumeMounts:
-        - name: config
-          mountPath: /config
-        - name: downloads
-          mountPath: /downloads
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
+        - name: qbittorrent
+          image: ghcr.io/linuxserver/qbittorrent:latest
+          ports:
+            - containerPort: 8080
+              name: webui
+            - containerPort: 6881
+              name: torrent-tcp
+              protocol: TCP
+            - containerPort: 6881
+              name: torrent-udp
+              protocol: UDP
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "UTC"
+            - name: WEBUI_PORT
+              value: "8080"
+            - name: QBITTORRENT_WEBUI_BYPASS_LOCAL_AUTH
+              value: "true"
+            - name: QBITTORRENT_WEBUI_HOST_HEADER_VALIDATION
+              value: "false"
+            - name: QBT_WEBUI_CSRF_PROTECTION
+              value: "false"
+            - name: QBT_WEBUI_SECURE_COOKIE
+              value: "false"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
       volumes:
-      - name: config
-        persistentVolumeClaim:
-          claimName: qbittorrent-config-pvc
-      - name: downloads
-        persistentVolumeClaim:
-          claimName: arr-downloads-pvc
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config-pvc
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: arr-downloads-pvc

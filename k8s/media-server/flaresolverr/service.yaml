@@ -9,9 +9,9 @@ spec:
   selector:
     app: flaresolverr
   ports:
-  - name: http
-    port: 8191
-    targetPort: 8191
-    nodePort: 30191
-    protocol: TCP
+    - name: http
+      port: 8191
+      targetPort: 8191
+      nodePort: 30191
+      protocol: TCP
   type: NodePort

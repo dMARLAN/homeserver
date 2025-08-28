@@ -8,23 +8,23 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8096
-    targetPort: 8096
-    nodePort: 30096
-    name: http
-  - port: 8920
-    targetPort: 8920
-    nodePort: 30920
-    name: https
-  - port: 1900
-    targetPort: 1900
-    nodePort: 31900
-    protocol: UDP
-    name: dlna
-  - port: 7359
-    targetPort: 7359
-    nodePort: 30359
-    protocol: UDP
-    name: discovery
+    - port: 8096
+      targetPort: 8096
+      nodePort: 30096
+      name: http
+    - port: 8920
+      targetPort: 8920
+      nodePort: 30920
+      name: https
+    - port: 1900
+      targetPort: 1900
+      nodePort: 31900
+      protocol: UDP
+      name: dlna
+    - port: 7359
+      targetPort: 7359
+      nodePort: 30359
+      protocol: UDP
+      name: discovery
   selector:
     app: jellyfin

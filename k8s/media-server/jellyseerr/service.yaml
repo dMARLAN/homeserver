@@ -9,9 +9,9 @@ spec:
   selector:
     app: jellyseerr
   ports:
-  - name: http
-    port: 5055
-    targetPort: 5055
-    nodePort: 30055
-    protocol: TCP
+    - name: http
+      port: 5055
+      targetPort: 5055
+      nodePort: 30055
+      protocol: TCP
   type: NodePort

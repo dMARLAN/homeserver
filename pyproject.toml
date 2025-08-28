@@ -31,3 +31,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["ANN"]  # Ignore type annotation requirements in test files
+
+[tool.uv.workspace]
+members = [
+    "photographyserver/api",
+    "photographyserver/db", 
+    "photographyserver/sync_worker",
+]

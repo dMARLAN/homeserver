@@ -16,29 +16,29 @@ spec:
         app: prowlarr
     spec:
       containers:
-      - name: prowlarr
-        image: ghcr.io/linuxserver/prowlarr:latest
-        ports:
-        - containerPort: 9696
-          name: http
-        env:
-        - name: PUID
-          value: "1000"
-        - name: PGID
-          value: "1000"
-        - name: TZ
-          value: "UTC"
-        volumeMounts:
-        - name: config
-          mountPath: /config
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: prowlarr
+          image: ghcr.io/linuxserver/prowlarr:latest
+          ports:
+            - containerPort: 9696
+              name: http
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "UTC"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
-      - name: config
-        persistentVolumeClaim:
-          claimName: prowlarr-config-pvc
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-config-pvc

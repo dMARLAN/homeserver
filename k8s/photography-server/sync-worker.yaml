@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-worker
+  namespace: photography-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-worker
+  template:
+    metadata:
+      labels:
+        app: sync-worker
+    spec:
+      containers:
+        - name: sync-worker
+          image: photography-server/sync-worker:latest
+          imagePullPolicy: Never  # For local development
+          envFrom:
+            - configMapRef:
+                name: photography-server-config
+          ports:
+            - containerPort: 8001
+              name: health
+          volumeMounts:
+            - name: photos-storage
+              mountPath: /app/photos
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          command: [ "uv", "run", "run.py" ]
+          workingDir: /app/photographyserver/sync_worker
+      volumes:
+        - name: photos-storage
+          persistentVolumeClaim:
+            claimName: photos-pvc
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.28
+          command: [ 'sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;' ]
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync-worker-service
+  namespace: photography-server
+spec:
+  selector:
+    app: sync-worker
+  ports:
+    - port: 8001
+      targetPort: 8001
+      name: health
+  type: ClusterIP

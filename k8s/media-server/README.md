@@ -5,15 +5,18 @@ A complete media server stack running on Kubernetes with automatic media managem
 ## Media Server Stack
 
 ### Components
+
 - **Jellyfin** - Media streaming server
 - **Jellyseerr** - Request management system with mobile-friendly interface
 - **Radarr** - Movie download manager
-- **Sonarr** - TV download manager 
+- **Sonarr** - TV download manager
 - **Prowlarr** - Indexer manager
 - **FlareSolverr** - Cloudflare proxy
 
 ### Directory Structure
+
 All media server components are organized under `/mnt/media-server/`:
+
 ```
 /mnt/media-server/
 ├── media/             # Shared media library (movies, TV shows)
@@ -44,28 +47,28 @@ All media server components are organized under `/mnt/media-server/`:
 ### Setup Process
 
 1. **Configure Prowlarr**
-   - Add indexers
-   - Add apps (Radarr, Sonarr)
-   - Add indexer proxy (FlareSolverr)
+    - Add indexers
+    - Add apps (Radarr, Sonarr)
+    - Add indexer proxy (FlareSolverr)
 
 2. **Configure QBitTorrent**
-   - Reset password
+    - Reset password
 
 3. **Configure Radarr**
-   - Connect to Prowlarr
-   - Add download client
-   - Set library path to `/movies`
+    - Connect to Prowlarr
+    - Add download client
+    - Set library path to `/movies`
 
 4. **Configure Sonarr**
-   - Connect to Prowlarr
-   - Add download client
-   - Set library path to `/tv`
+    - Connect to Prowlarr
+    - Add download client
+    - Set library path to `/tv`
 
 5. **Configure Jellyseerr**
-   - Connect to Jellyfin server
-   - Connect to Radarr
-   - Connect to Sonarr
+    - Connect to Jellyfin server
+    - Connect to Radarr
+    - Connect to Sonarr
 
 6. **Access Jellyfin** (http://YOUR-NODE-IP:30096)
-   - Complete initial setup
-   - Add media libraries pointing to `/media`
+    - Complete initial setup
+    - Add media libraries pointing to `/media`

@@ -6,7 +6,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
 echo "Deploying media server stack..."
-echo "Working from: ${SCRIPT_DIR}"
 
 # Apply namespace
 kubectl apply -f namespace.yaml

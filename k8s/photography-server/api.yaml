@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: photography-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: photography-server/api:latest
+          imagePullPolicy: Never  # For local development
+          envFrom:
+            - configMapRef:
+                name: photography-server-config
+          ports:
+            - containerPort: 8000
+              name: http
+          volumeMounts:
+            - name: photos-storage
+              mountPath: /app/photos
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          command: [ "uv", "run", "run.py" ]
+          workingDir: /app/photographyserver/api
+      volumes:
+        - name: photos-storage
+          persistentVolumeClaim:
+            claimName: photos-pvc
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.28
+          command: [ 'sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;' ]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+  namespace: photography-server
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+  type: ClusterIP

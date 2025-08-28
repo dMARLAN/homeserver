@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: photography-server-config
+  namespace: photography-server
+data:
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "photography_server"
+  DB_USER: "postgres"
+  DB_PASSWORD: "postgres"
+  ENVIRONMENT: "development"
+  SYNC_PHOTOS_BASE_PATH: "/app/photos"
+  SYNC_INITIAL_SYNC_ON_STARTUP: "true"
+  SYNC_PERIODIC_SYNC_INTERVAL: "300"
+  SYNC_HEALTH_CHECK_PORT: "8001"
+  SYNC_HEALTH_CHECK_HOST: "0.0.0.0"
+  SYNC_LOG_LEVEL: "INFO"
