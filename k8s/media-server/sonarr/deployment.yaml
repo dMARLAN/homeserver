@@ -40,9 +40,6 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "200m"
-            limits:
-              memory: "1Gi"
-              cpu: "1000m"
       volumes:
         - name: config
           persistentVolumeClaim:
