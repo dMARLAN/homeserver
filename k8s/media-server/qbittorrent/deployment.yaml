@@ -15,6 +15,7 @@ spec:
       labels:
         app: qbittorrent
     spec:
+      hostNetwork: true
       containers:
         - name: qbittorrent
           image: ghcr.io/linuxserver/qbittorrent:latest
