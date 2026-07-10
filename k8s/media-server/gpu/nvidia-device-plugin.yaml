@@ -14,6 +14,8 @@ spec:
       labels:
         name: nvidia-device-plugin-ds
     spec:
+      # The plugin itself needs the nvidia runtime to enumerate GPUs via NVML.
+      runtimeClassName: nvidia
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
@@ -23,10 +25,8 @@ spec:
         - name: nvidia-device-plugin-ctr
           image: nvcr.io/nvidia/k8s-device-plugin:v0.17.1
           env:
-            # The KIND node selects GPUs via volume mounts, not env vars,
-            # so the plugin must advertise them the same way.
-            - name: DEVICE_LIST_STRATEGY
-              value: volume-mounts
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

@@ -28,6 +28,14 @@ All media server components are organized under `/mnt/media-server/`:
 └── prowlarr/config/   # Prowlarr configuration
 ```
 
+### Cluster Setup (one-time)
+
+1. `sudo ./setup-host-k3s.sh` — installs a fresh k3s on the host (backs up any
+   previous k3s PVC storage to `/mnt/media-server/backups/` first). GPU support
+   is auto-detected from the host's nvidia-container-runtime.
+2. `./setup-cluster.sh` — writes the `homeserver` kubectl context, installs the
+   nvidia RuntimeClass + device plugin, and deploys the stack.
+
 ### Deployment/Management
 
 - `make deploy-media-server` (Deploys k3s stack)
