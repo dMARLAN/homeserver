@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: jellyseerr-config-pvc
   hostPath:
     path: /mnt/media-server/jellyseerr/config
     type: DirectoryOrCreate

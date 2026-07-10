@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: sonarr-config-pvc
   hostPath:
     path: /mnt/media-server/sonarr/config
     type: DirectoryOrCreate

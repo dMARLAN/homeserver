@@ -9,6 +9,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: shared-media-pvc
   hostPath:
     path: /mnt/media-server/media
     type: DirectoryOrCreate

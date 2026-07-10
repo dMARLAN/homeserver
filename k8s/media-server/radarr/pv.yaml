@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: radarr-config-pvc
   hostPath:
     path: /mnt/media-server/radarr/config
     type: DirectoryOrCreate
@@ -24,6 +27,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: arr-downloads-pvc
   hostPath:
     path: /mnt/media-server/downloads
     type: DirectoryOrCreate

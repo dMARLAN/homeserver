@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: jellyfin-config-pvc
   hostPath:
     path: /mnt/media-server/jellyfin/config
     type: DirectoryOrCreate
@@ -24,6 +27,9 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: jellyfin-media-pvc
   hostPath:
     path: /mnt/media-server/media
     type: DirectoryOrCreate

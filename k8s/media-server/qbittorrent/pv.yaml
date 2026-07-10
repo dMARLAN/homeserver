@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: qbittorrent-config-pvc
   hostPath:
     path: /mnt/media-server/qbittorrent/config
     type: DirectoryOrCreate

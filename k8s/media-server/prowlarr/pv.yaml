@@ -9,6 +9,9 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
+  claimRef:
+    namespace: media-server
+    name: prowlarr-config-pvc
   hostPath:
     path: /mnt/media-server/prowlarr/config
     type: DirectoryOrCreate
