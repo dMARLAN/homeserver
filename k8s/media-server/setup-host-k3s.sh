@@ -38,5 +38,10 @@ EOF
 echo "Installing fresh k3s..."
 curl -sfL https://get.k3s.io | sh -
 
-k3s kubectl wait --for=condition=Ready "node/$(hostname | tr '[:upper:]' '[:lower:]')" --timeout=180s
+NODE="$(hostname | tr '[:upper:]' '[:lower:]')"
+for _ in $(seq 1 60); do
+    k3s kubectl get "node/${NODE}" > /dev/null 2>&1 && break
+    sleep 2
+done
+k3s kubectl wait --for=condition=Ready "node/${NODE}" --timeout=180s
 echo "k3s is up. Now run ./setup-cluster.sh as your normal user."
