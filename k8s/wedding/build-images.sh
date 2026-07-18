@@ -29,10 +29,10 @@ docker build -f dockerfiles/frontend.Dockerfile \
     -t wedding-frontend:prod src/frontend
 
 echo "==> Importing wedding-api:prod into k3s containerd..."
-docker save wedding-api:prod | k3s ctr -n k8s.io images import -
+docker save wedding-api:prod | sudo k3s ctr -n k8s.io images import -
 
 echo "==> Importing wedding-frontend:prod into k3s containerd..."
-docker save wedding-frontend:prod | k3s ctr -n k8s.io images import -
+docker save wedding-frontend:prod | sudo k3s ctr -n k8s.io images import -
 
 if kubectl get deployment wedding-api wedding-frontend -n wedding > /dev/null 2>&1; then
     echo "==> Restarting wedding deployments..."
