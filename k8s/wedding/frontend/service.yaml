@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wedding-frontend
+  namespace: wedding
+  labels:
+    app: wedding-frontend
+spec:
+  selector:
+    app: wedding-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000

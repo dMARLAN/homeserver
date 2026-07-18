@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wedding-api-config
+  namespace: wedding
+data:
+  PYTHONPATH: "/app/src/api/src"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_NAME: "wedding"
+  PHOTOS_ROOT_DIR: "/data/photos"
+  # "*" is safe here: the pod is only reachable through Traefik inside the cluster, so every
+  # peer that connects is a trusted proxy whose X-Forwarded-For carries the real client IP.
+  FORWARDED_ALLOW_IPS: "*"
+  APP_FRONTEND_BASE_URL: "https://chadandjanina.wedding"
+  # pydantic-settings parses list[str] fields from JSON.
+  APP_CORS_ORIGINS: '["https://chadandjanina.wedding", "https://www.chadandjanina.wedding"]'

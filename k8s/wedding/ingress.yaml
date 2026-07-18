@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wedding
+  namespace: wedding
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - chadandjanina.wedding
+        - www.chadandjanina.wedding
+        - api.chadandjanina.wedding
+      secretName: wedding-tls
+  rules:
+    - host: chadandjanina.wedding
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wedding-frontend
+                port:
+                  number: 3000
+    - host: www.chadandjanina.wedding
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wedding-frontend
+                port:
+                  number: 3000
+    - host: api.chadandjanina.wedding
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wedding-api
+                port:
+                  number: 8000

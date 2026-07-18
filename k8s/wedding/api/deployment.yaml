@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wedding-api
+  namespace: wedding
+  labels:
+    app: wedding-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wedding-api
+  template:
+    metadata:
+      labels:
+        app: wedding-api
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: api
+          image: ghcr.io/dmarlan/wedding-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: wedding-api-config
+            - secretRef:
+                name: wedding-api-secrets
+          volumeMounts:
+            - name: photos
+              mountPath: /data/photos
+      volumes:
+        - name: photos
+          persistentVolumeClaim:
+            claimName: photos-pvc

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wedding-frontend
+  namespace: wedding
+  labels:
+    app: wedding-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wedding-frontend
+  template:
+    metadata:
+      labels:
+        app: wedding-frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: frontend
+          image: ghcr.io/dmarlan/wedding-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            # Client bundle bakes NEXT_PUBLIC_API_URL at image build time; this only covers
+            # server-side reads.
+            - name: NEXT_PUBLIC_API_URL
+              value: "https://api.chadandjanina.wedding"
+            - name: API_INTERNAL_URL
+              value: "http://wedding-api:8000"
+            - name: AUTH_TRUST_HOST
+              value: "true"
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wedding-frontend-secrets
+                  key: AUTH_SECRET
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wedding-frontend-secrets
+                  key: ADMIN_PASSWORD
+            - name: ADMIN_AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wedding-frontend-secrets
+                  key: ADMIN_AUTH_JWT_SECRET

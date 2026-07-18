@@ -1,0 +1,28 @@
+# Requires the api image to contain /app/src/db/alembic.ini and /app/src/db/alembic/
+# (see the "Migrations" caveat in README.md).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wedding-migrate
+  namespace: wedding
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: wedding-migrate
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: migrate
+          image: ghcr.io/dmarlan/wedding-api:latest
+          imagePullPolicy: Always
+          workingDir: /app/src/db
+          command: ["/app/.venv/bin/alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: wedding-api-config
+            - secretRef:
+                name: wedding-api-secrets
