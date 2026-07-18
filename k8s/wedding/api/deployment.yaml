@@ -15,12 +15,10 @@ spec:
       labels:
         app: wedding-api
     spec:
-      imagePullSecrets:
-        - name: ghcr-pull
       containers:
         - name: api
-          image: ghcr.io/dmarlan/wedding-api:latest
-          imagePullPolicy: Always
+          image: docker.io/library/wedding-api:prod
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
           envFrom:

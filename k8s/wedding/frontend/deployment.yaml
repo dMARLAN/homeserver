@@ -15,12 +15,10 @@ spec:
       labels:
         app: wedding-frontend
     spec:
-      imagePullSecrets:
-        - name: ghcr-pull
       containers:
         - name: frontend
-          image: ghcr.io/dmarlan/wedding-frontend:latest
-          imagePullPolicy: Always
+          image: docker.io/library/wedding-frontend:prod
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           env:

@@ -1,14 +1,15 @@
 # Wedding Website
 
 Production deployment of [wedding-website](https://github.com/dMARLAN/wedding-website)
-(chadandjanina.wedding). That repo builds the images and its `k8s/` manifests mirror
-this deployment's shape; this directory holds the production glue.
+(chadandjanina.wedding). Images are built directly on this server from a local
+checkout of that repo (no container registry); its `k8s/` manifests mirror this
+deployment's shape, and this directory holds the production glue.
 
-| Component | Image                                     | Host                        |
-|-----------|-------------------------------------------|-----------------------------|
-| frontend  | `ghcr.io/dmarlan/wedding-frontend:latest` | chadandjanina.wedding, www. |
-| api       | `ghcr.io/dmarlan/wedding-api:latest`      | api.chadandjanina.wedding   |
-| postgres  | `postgres:16`                             | cluster-internal only       |
+| Component | Image                                      | Host                        |
+|-----------|--------------------------------------------|-----------------------------|
+| frontend  | `docker.io/library/wedding-frontend:prod`  | chadandjanina.wedding, www. |
+| api       | `docker.io/library/wedding-api:prod`       | api.chadandjanina.wedding   |
+| postgres  | `postgres:16`                              | cluster-internal only       |
 
 ## Prerequisites
 
@@ -46,22 +47,29 @@ Rules the values must follow:
   (`wedding-postgres-secrets`) — the same database credential referenced from two
   places.
 
-## Image pull secret (ghcr-pull)
+## Build images
 
-The wedding-website repo is private, so its GHCR packages may be private too. Both
-deployments and the migration Job reference `imagePullSecrets: ghcr-pull`. Create it
-once with a GitHub PAT that has `read:packages`:
+Images are built locally with docker and imported into k3s containerd — there is
+no registry, and both deployments plus the migration Job use
+`imagePullPolicy: Never`.
 
-```
-kubectl create secret docker-registry ghcr-pull \
-  --docker-server=ghcr.io \
-  --docker-username=dMARLAN \
-  --docker-password=<github-pat-with-read:packages> \
-  -n wedding
-```
+1. Clone (or `git pull`) the wedding-website repo with your own git credentials,
+   e.g. to `/home/marlan/wedding-website`. Scripts never touch git.
+2. Build + import:
 
-(Alternatively, make the GHCR packages public and delete the `imagePullSecrets`
-blocks.)
+   ```
+   sudo ./build-images.sh /home/marlan/wedding-website
+   # or, from repo root: sudo make wedding-build WEDDING_REPO=/home/marlan/wedding-website
+   ```
+
+The script builds `wedding-api:prod` (repo-root context,
+`src/api/dockerfiles/base.Dockerfile`) and `wedding-frontend:prod`
+(`dockerfiles/frontend.Dockerfile` with `src/frontend` as context and
+`NEXT_PUBLIC_API_URL=https://api.chadandjanina.wedding` baked in), pipes each
+through `docker save` into `k3s ctr -n k8s.io images import -`, and — if the
+wedding deployments already exist — restarts them so they pick up the new images.
+containerd stores the imported images as `docker.io/library/wedding-*:prod`, which
+is what the manifests reference.
 
 ## Deploy
 
@@ -71,9 +79,9 @@ blocks.)
 
 The script applies namespace → PVs → secrets → configmap → postgres (waits for
 ready) → migration Job (waits for completion) → api → frontend → ingress, then
-prints the URLs. It is idempotent — re-run it to roll out changes. Pods pull
-`:latest`, so after a new image is published:
-`kubectl rollout restart deployment/wedding-api deployment/wedding-frontend -n wedding`.
+prints the URLs. It is idempotent — re-run it to roll out changes. After building
+new images there is nothing extra to do: `build-images.sh` already runs
+`kubectl rollout restart` on both deployments.
 
 ## Migrations
 
@@ -85,20 +93,6 @@ make wedding-migrate   # deletes the previous Job, re-applies it, waits for comp
 
 The Job runs `alembic upgrade head` from `/app/src/db` inside the api image using
 the same DB env as the api.
-
-> **⚠️ Caveat — api image is currently missing the alembic files.** The api image's
-> `src/api/dockerfiles/base.Dockerfile` copies `src/db/pyproject.toml` and
-> `src/db/src` but **not** `src/db/alembic.ini` or `src/db/alembic/` (env.py +
-> versions). The `alembic` package itself is installed (it is a main dependency of
-> `wedding-db`), so the Job will work as written once the Dockerfile adds:
->
-> ```dockerfile
-> COPY ./src/db/alembic.ini ./src/db/alembic.ini
-> COPY ./src/db/alembic ./src/db/alembic
-> ```
->
-> Until that lands in wedding-website and a new image is published, the migration
-> Job will fail with "No config file 'alembic.ini' found".
 
 **Never run the seed scripts (`src/db/scripts/seed_dev.py`) against production** —
 they exist for local dev fixtures only.
@@ -115,6 +109,7 @@ Recommended: a nightly cron that runs
 
 | Target             | What it does                                       |
 |--------------------|----------------------------------------------------|
+| `wedding-build`    | Runs `build-images.sh ${WEDDING_REPO}`             |
 | `deploy-wedding`   | Runs `deploy.sh`                                   |
 | `wedding-up`       | Scales all wedding deployments to 1                |
 | `wedding-down`     | Scales all wedding deployments to 0                |
