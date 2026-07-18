@@ -1,6 +1,6 @@
 .PHONY: \
 deploy-media-server media-server-up media-server-down teardown-media-server media-server-urls \
-wedding-build deploy-wedding wedding-up wedding-down wedding-migrate teardown-wedding
+wedding-build wedding-redeploy deploy-wedding wedding-up wedding-down wedding-migrate teardown-wedding
 
 deploy-media-server:
 	./k8s/media-server/deploy.sh
@@ -19,9 +19,17 @@ teardown-media-server:
 	kubectl get pv -o name | grep -E "(jellyfin|prowlarr|radarr|sonarr|jellyseerr|qbittorrent|shared-media|arr-downloads)" | xargs kubectl delete || true
 	@echo "✅ Stack deleted (data preserved in /mnt/media-server/)"
 
+WEDDING_REPO ?= ${HOME}/PycharmProjects/wedding-website
+
 wedding-build:
-	@test -n "${WEDDING_REPO}" || { echo "Usage: make wedding-build WEDDING_REPO=/path/to/wedding-website"; exit 1; }
+	@test -d "${WEDDING_REPO}" || { echo "wedding-website repo not found at ${WEDDING_REPO} (override with WEDDING_REPO=/path)"; exit 1; }
 	./k8s/wedding/build-images.sh ${WEDDING_REPO}
+
+wedding-redeploy:
+	git -C ${WEDDING_REPO} pull --ff-only
+	$(MAKE) wedding-build
+	$(MAKE) wedding-migrate
+	@echo "✅ Wedding site redeployed"
 
 deploy-wedding:
 	./k8s/wedding/deploy.sh
