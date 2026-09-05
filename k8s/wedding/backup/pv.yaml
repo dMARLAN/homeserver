@@ -1,0 +1,32 @@
+# Backups land on the same disk as the data they protect; they cover mistakes and bad
+# migrations, not a dead drive. Copy /mnt/wedding/backups off-host for that.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wedding-backups-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: wedding
+    name: backups-pvc
+  hostPath:
+    path: /mnt/wedding/backups
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backups-pvc
+  namespace: wedding
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 10Gi

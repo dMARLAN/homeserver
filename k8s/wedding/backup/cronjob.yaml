@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wedding-backup-script
+  namespace: wedding
+data:
+  backup.sh: |
+    #!/bin/bash
+    
+    set -euo pipefail
+    
+    BACKUP_DIR="/backups"
+    RETENTION_DAYS="${RETENTION_DAYS:-7}"
+    stamp="$(date -u +%Y-%m-%d-%H%M%S)"
+    
+    dump="${BACKUP_DIR}/wedding-db-${stamp}.dump"
+    photos="${BACKUP_DIR}/wedding-files-${stamp}.tar.gz"
+    
+    echo "==> pg_dump -> ${dump}"
+    pg_dump -h "${PGHOST}" -U "${PGUSER}" -Fc "${PGDATABASE}" > "${dump}.partial"
+    mv "${dump}.partial" "${dump}"
+    
+    echo "==> photos + inbox -> ${photos}"
+    tar -czf "${photos}.partial" -C /data photos mail
+    mv "${photos}.partial" "${photos}"
+    
+    echo "==> pruning backups older than ${RETENTION_DAYS} days"
+    find "${BACKUP_DIR}" -maxdepth 1 -name 'wedding-*' -mtime "+${RETENTION_DAYS}" -print -delete
+    
+    ls -lh "${BACKUP_DIR}"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wedding-backup
+  namespace: wedding
+spec:
+  # Nightly, local time, while nobody is editing the site.
+  schedule: "15 3 * * *"
+  timeZone: "America/Winnipeg"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup
+              # Same major as postgres/deployment.yaml so pg_dump matches the server.
+              image: postgres:16
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - name: PGHOST
+                  value: postgres
+                - name: PGUSER
+                  value: postgres
+                - name: PGDATABASE
+                  value: wedding
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: wedding-postgres-secrets
+                      key: POSTGRES_PASSWORD
+                - name: RETENTION_DAYS
+                  value: "7"
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: backups
+                  mountPath: /backups
+                - name: photos
+                  mountPath: /data/photos
+                  readOnly: true
+                - name: mail
+                  mountPath: /data/mail
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: wedding-backup-script
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups-pvc
+            - name: photos
+              persistentVolumeClaim:
+                claimName: photos-pvc
+            - name: mail
+              persistentVolumeClaim:
+                claimName: mail-inbox-pvc

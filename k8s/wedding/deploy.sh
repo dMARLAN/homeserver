@@ -21,6 +21,7 @@ ${KUBECTL} apply -f namespace.yaml
 ${KUBECTL} apply -f postgres/pv.yaml
 ${KUBECTL} apply -f api/pv.yaml
 ${KUBECTL} apply -f mail/pv.yaml
+${KUBECTL} apply -f backup/pv.yaml
 
 ${KUBECTL} apply -f secrets.yaml
 ${KUBECTL} apply -f api/configmap.yaml
@@ -46,6 +47,7 @@ ${KUBECTL} apply -f frontend/deployment.yaml
 ${KUBECTL} apply -f frontend/service.yaml
 
 ${KUBECTL} apply -f ingress.yaml
+${KUBECTL} apply -f backup/cronjob.yaml
 
 echo "Wedding website stack deployed successfully!"
 echo ""

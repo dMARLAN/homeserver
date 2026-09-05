@@ -114,9 +114,20 @@ of record (hostPath PVs, `Retain` reclaim policy — they survive `teardown-wedd
 delivered, so it needs no backup, but it is kept on the host so queued mail survives a
 pod restart. `/mnt/wedding/mail/inbox` is the received-mail Maildir (`hello@`, `dmarc@`,
 `postmaster@`) — back it up with the photos.
-Recommended: a nightly cron that runs
-`kubectl exec deploy/postgres -n wedding -- pg_dump -U postgres wedding` plus an
-`rsync` of `/mnt/wedding/photos` to another machine or drive. Not automated here.
+`backup/cronjob.yaml` runs nightly at 03:15 America/Winnipeg: a `pg_dump -Fc` of the
+database plus a tarball of `/mnt/wedding/photos` and `/mnt/wedding/mail`, written to
+`/mnt/wedding/backups` (`backup/pv.yaml`), keeping seven days. Run one on demand with
+`kubectl --context homeserver -n wedding create job backup-now --from=cronjob/wedding-backup`.
+
+Restore the database (stops the api first so nothing writes mid-restore):
+
+    kubectl --context homeserver -n wedding scale deployment/wedding-api --replicas=0
+    kubectl --context homeserver -n wedding exec -i deploy/postgres -- \
+        pg_restore -U postgres -d wedding --clean --if-exists < /mnt/wedding/backups/wedding-db-<stamp>.dump
+    kubectl --context homeserver -n wedding scale deployment/wedding-api --replicas=1
+
+The backups sit on the same disk as the data, so copy `/mnt/wedding/backups` off-host
+for protection against drive loss.
 
 ## Mail (`wedding-mail`)
 
