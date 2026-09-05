@@ -4,7 +4,7 @@ WEDDING_REPO ?= ${HOME}/PycharmProjects/wedding-website
 
 .PHONY: \
 deploy-media-server media-server-up media-server-down teardown-media-server media-server-urls \
-wedding-build wedding-redeploy deploy-wedding wedding-up wedding-down wedding-migrate teardown-wedding
+wedding-build wedding-redeploy wedding-restart deploy-wedding wedding-up wedding-down wedding-migrate teardown-wedding
 
 deploy-media-server:
 	./k8s/media-server/deploy.sh
@@ -27,11 +27,20 @@ wedding-build:
 	@test -d "${WEDDING_REPO}" || { echo "wedding-website repo not found at ${WEDDING_REPO} (override with WEDDING_REPO=/path)"; exit 1; }
 	KUBECTL="${KUBECTL}" ./k8s/wedding/build-images.sh ${WEDDING_REPO}
 
+# Migrate before restarting so the new code never runs against the old schema.
 wedding-redeploy:
 	git -C ${WEDDING_REPO} pull --ff-only
 	$(MAKE) wedding-build
 	$(MAKE) wedding-migrate
+	$(MAKE) wedding-restart
 	@echo "✅ Wedding site redeployed"
+
+wedding-restart:
+	${KUBECTL} rollout restart deployment/wedding-api deployment/wedding-frontend deployment/wedding-mail -n wedding
+	${KUBECTL} rollout status deployment/wedding-api -n wedding --timeout=180s
+	${KUBECTL} rollout status deployment/wedding-frontend -n wedding --timeout=180s
+	${KUBECTL} rollout status deployment/wedding-mail -n wedding --timeout=180s
+	@echo "✅ Wedding deployments restarted"
 
 deploy-wedding:
 	KUBECTL="${KUBECTL}" ./k8s/wedding/deploy.sh

@@ -74,8 +74,9 @@ The script builds `wedding-api:prod` (repo-root context,
 (`dockerfiles/frontend.Dockerfile` with `src/frontend` as context and
 `NEXT_PUBLIC_API_URL=https://api.chadandjanina.wedding` baked in) and
 `wedding-mail:prod` (`mail/Dockerfile` in this repo), pipes each through
-`docker save` into `k3s ctr -n k8s.io images import -`, and — if the wedding
-deployments already exist — restarts them so they pick up the new images.
+`docker save` into `k3s ctr -n k8s.io images import -`. It does not restart
+anything: `make wedding-restart` rolls the deployments, and `make wedding-redeploy`
+sequences pull → build → migrate → restart so new code never runs against an old schema.
 containerd stores the imported images as `docker.io/library/wedding-*:prod`, which
 is what the manifests reference.
 
@@ -88,8 +89,8 @@ is what the manifests reference.
 The script applies namespace → PVs → secrets → api configmap → postgres (waits for
 ready) → migration Job (waits for completion) → mail (configmap, certificate, deployment,
 services) → api → frontend → ingress, then prints the URLs. It is idempotent — re-run it
-to roll out changes. After building new images there is nothing extra to do:
-`build-images.sh` already runs `kubectl rollout restart` on all three deployments.
+to roll out changes. After building new images, run `make wedding-migrate` and then
+`make wedding-restart` (or just `make wedding-redeploy`, which does both).
 
 ## Migrations
 
