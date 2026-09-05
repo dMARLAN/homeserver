@@ -1,0 +1,14 @@
+# HTTP-01 works for the mail host because its A record points at this node and cert-manager
+# publishes the challenge through its own temporary Traefik ingress.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wedding-mail-tls
+  namespace: wedding
+spec:
+  secretName: wedding-mail-tls
+  dnsNames:
+    - mail.chadandjanina.wedding
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

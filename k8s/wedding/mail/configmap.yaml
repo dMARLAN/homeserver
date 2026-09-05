@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wedding-mail-config
+  namespace: wedding
+data:
+  MAIL_DOMAIN: "chadandjanina.wedding"
+  # HELO name and Received: headers must match the public A/PTR, not the pod name, or receivers
+  # score the mail as spam.
+  MAIL_HOSTNAME: "mail.chadandjanina.wedding"
+  DKIM_SELECTOR: "std2026"
+  # k3s pod + service CIDRs. Only the submission listener (587) and OpenDKIM's InternalHosts
+  # trust these; the public port 25 never does.
+  MYNETWORKS: "127.0.0.0/8,10.42.0.0/16,10.43.0.0/16"
+  INBOX_ADDRESS: "hello"
+  INBOX_ALIASES: "dmarc,postmaster"
+  MESSAGE_SIZE_LIMIT: "26214400"
+  # Empty = deliver straight to recipient MXes (needs the ISP to unblock outbound TCP/25 and a
+  # matching PTR). Fallback: "[smtp.provider.example]:587" plus RELAYHOST_USERNAME/PASSWORD in
+  # wedding-mail-secrets; the entrypoint then forces TLS and SASL towards that host.
+  RELAYHOST: ""

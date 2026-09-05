@@ -1,0 +1,39 @@
+# In-cluster only: the api submits on 587; port 25 is here so in-cluster smoke tests can exercise
+# the public-MX rules without leaving the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mail
+  namespace: wedding
+  labels:
+    app: wedding-mail
+spec:
+  selector:
+    app: wedding-mail
+  ports:
+    - name: submission
+      port: 587
+      targetPort: submission
+    - name: smtp
+      port: 25
+      targetPort: smtp
+---
+# The public MX. Only port 25 is exposed; the trusting submission listener must never be.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mail-public
+  namespace: wedding
+  labels:
+    app: wedding-mail
+spec:
+  type: LoadBalancer
+  # Keeps the client IP visible to Postfix where k3s ServiceLB allows it; port 25 never relies on
+  # it for trust either way.
+  externalTrafficPolicy: Local
+  selector:
+    app: wedding-mail
+  ports:
+    - name: smtp
+      port: 25
+      targetPort: smtp

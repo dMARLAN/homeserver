@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wedding-mail
+  namespace: wedding
+  labels:
+    app: wedding-mail
+spec:
+  replicas: 1
+  # Two Postfix instances must never share one spool directory.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wedding-mail
+  template:
+    metadata:
+      labels:
+        app: wedding-mail
+    spec:
+      containers:
+        - name: mail
+          image: docker.io/library/wedding-mail:prod
+          imagePullPolicy: Never
+          ports:
+            - name: smtp
+              containerPort: 25
+            - name: submission
+              containerPort: 587
+          envFrom:
+            - configMapRef:
+                name: wedding-mail-config
+          env:
+            - name: RELAYHOST_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: wedding-mail-secrets
+                  key: RELAYHOST_USERNAME
+                  optional: true
+            - name: RELAYHOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wedding-mail-secrets
+                  key: RELAYHOST_PASSWORD
+                  optional: true
+          volumeMounts:
+            - name: spool
+              mountPath: /var/spool/postfix
+            - name: inbox
+              mountPath: /var/mail/vhosts
+            - name: dkim-key
+              mountPath: /etc/opendkim/keys
+              readOnly: true
+            - name: tls
+              mountPath: /etc/postfix/tls
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: smtp
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+      volumes:
+        - name: spool
+          persistentVolumeClaim:
+            claimName: mail-spool-pvc
+        - name: inbox
+          persistentVolumeClaim:
+            claimName: mail-inbox-pvc
+        - name: dkim-key
+          secret:
+            secretName: wedding-mail-secrets
+            defaultMode: 0400
+            items:
+              - key: chadandjanina.wedding.private
+                path: chadandjanina.wedding.private
+        # Issued by cert-manager (certificate.yaml). Optional so the pod can start before the
+        # first issuance; the entrypoint then runs port 25 without STARTTLS.
+        - name: tls
+          secret:
+            secretName: wedding-mail-tls
+            defaultMode: 0400
+            optional: true

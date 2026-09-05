@@ -2,6 +2,9 @@
 
 set -e
 
+# A dev kind cluster on this machine is the current kubectl context; production must be named.
+KUBECTL="${KUBECTL:-kubectl --context homeserver}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
@@ -13,30 +16,36 @@ fi
 
 echo "Deploying wedding website stack..."
 
-kubectl apply -f namespace.yaml
+${KUBECTL} apply -f namespace.yaml
 
-kubectl apply -f postgres/pv.yaml
-kubectl apply -f api/pv.yaml
+${KUBECTL} apply -f postgres/pv.yaml
+${KUBECTL} apply -f api/pv.yaml
+${KUBECTL} apply -f mail/pv.yaml
 
-kubectl apply -f secrets.yaml
-kubectl apply -f api/configmap.yaml
+${KUBECTL} apply -f secrets.yaml
+${KUBECTL} apply -f api/configmap.yaml
 
-kubectl apply -f postgres/deployment.yaml
-kubectl apply -f postgres/service.yaml
+${KUBECTL} apply -f postgres/deployment.yaml
+${KUBECTL} apply -f postgres/service.yaml
 echo "Waiting for postgres to become ready..."
-kubectl rollout status deployment/postgres -n wedding --timeout=180s
+${KUBECTL} rollout status deployment/postgres -n wedding --timeout=180s
 
 echo "Running database migrations..."
-kubectl delete job wedding-migrate -n wedding --ignore-not-found
-kubectl apply -f migrate-job.yaml
-kubectl wait --for=condition=complete job/wedding-migrate -n wedding --timeout=180s
+${KUBECTL} delete job wedding-migrate -n wedding --ignore-not-found
+${KUBECTL} apply -f migrate-job.yaml
+${KUBECTL} wait --for=condition=complete job/wedding-migrate -n wedding --timeout=180s
 
-kubectl apply -f api/deployment.yaml
-kubectl apply -f api/service.yaml
-kubectl apply -f frontend/deployment.yaml
-kubectl apply -f frontend/service.yaml
+${KUBECTL} apply -f mail/configmap.yaml
+${KUBECTL} apply -f mail/certificate.yaml
+${KUBECTL} apply -f mail/deployment.yaml
+${KUBECTL} apply -f mail/service.yaml
 
-kubectl apply -f ingress.yaml
+${KUBECTL} apply -f api/deployment.yaml
+${KUBECTL} apply -f api/service.yaml
+${KUBECTL} apply -f frontend/deployment.yaml
+${KUBECTL} apply -f frontend/service.yaml
+
+${KUBECTL} apply -f ingress.yaml
 
 echo "Wedding website stack deployed successfully!"
 echo ""

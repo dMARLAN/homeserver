@@ -1,3 +1,4 @@
 /.venv/
 /.idea/
 k8s/wedding/secrets.yaml
+k8s/wedding/mail/keys/

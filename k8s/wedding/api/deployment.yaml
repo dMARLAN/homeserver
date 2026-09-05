@@ -29,7 +29,12 @@ spec:
           volumeMounts:
             - name: photos
               mountPath: /data/photos
+            - name: inbox
+              mountPath: /var/mail/vhosts
       volumes:
         - name: photos
           persistentVolumeClaim:
             claimName: photos-pvc
+        - name: inbox
+          persistentVolumeClaim:
+            claimName: mail-inbox-pvc

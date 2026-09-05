@@ -2,6 +2,10 @@
 
 set -e
 
+# A dev kind cluster on this machine is the current kubectl context; production must be named.
+KUBECTL="${KUBECTL:-kubectl --context homeserver}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 usage() {
     echo "Usage: ${0} <wedding-website-repo-dir>" >&2
     echo "Builds the wedding images from a local wedding-website checkout and imports them into k3s." >&2
@@ -28,15 +32,21 @@ docker build -f dockerfiles/frontend.Dockerfile \
     --build-arg NEXT_PUBLIC_API_URL=https://api.chadandjanina.wedding \
     -t wedding-frontend:prod src/frontend
 
+echo "==> Building wedding-mail:prod..."
+docker build -t wedding-mail:prod "${SCRIPT_DIR}/mail"
+
 echo "==> Importing wedding-api:prod into k3s containerd..."
 docker save wedding-api:prod | sudo k3s ctr -n k8s.io images import -
 
 echo "==> Importing wedding-frontend:prod into k3s containerd..."
 docker save wedding-frontend:prod | sudo k3s ctr -n k8s.io images import -
 
-if kubectl get deployment wedding-api wedding-frontend -n wedding > /dev/null 2>&1; then
+echo "==> Importing wedding-mail:prod into k3s containerd..."
+docker save wedding-mail:prod | sudo k3s ctr -n k8s.io images import -
+
+if ${KUBECTL} get deployment wedding-api wedding-frontend wedding-mail -n wedding > /dev/null 2>&1; then
     echo "==> Restarting wedding deployments..."
-    kubectl rollout restart deployment/wedding-api deployment/wedding-frontend -n wedding
+    ${KUBECTL} rollout restart deployment/wedding-api deployment/wedding-frontend deployment/wedding-mail -n wedding
 else
     echo "==> Wedding deployments not found; skipping restart (first deploy happens via deploy.sh)."
 fi

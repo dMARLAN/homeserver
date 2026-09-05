@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wedding-mail-spool-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: wedding
+    name: mail-spool-pvc
+  hostPath:
+    path: /mnt/wedding/mail-spool
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-spool-pvc
+  namespace: wedding
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Mounted at /var/mail/vhosts by both the mail pod (writer) and the api pod (reader), so the
+# Maildir lives at /mnt/wedding/mail/inbox/{new,cur,tmp} on the node.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wedding-mail-inbox-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: wedding
+    name: mail-inbox-pvc
+  hostPath:
+    path: /mnt/wedding/mail
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-inbox-pvc
+  namespace: wedding
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 5Gi

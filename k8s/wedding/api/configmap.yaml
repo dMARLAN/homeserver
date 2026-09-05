@@ -10,6 +10,13 @@ data:
   DB_USER: "postgres"
   DB_NAME: "wedding"
   PHOTOS_ROOT_DIR: "/data/photos"
+  # Plain SMTP to the in-cluster mail pod's submission listener (mail/); it DKIM-signs and speaks
+  # TLS to the outside world, so no auth or STARTTLS between pods. Port 25 is the public MX with
+  # no relay rights, so the api must not use it.
+  EMAIL_SMTP_HOST: "mail"
+  EMAIL_SMTP_PORT: "587"
+  # Maildir written by the mail pod; both pods mount mail-inbox-pvc at /var/mail/vhosts.
+  MAIL_INBOX_DIR: "/var/mail/vhosts/inbox"
   # "*" is safe here: the pod is only reachable through Traefik inside the cluster, so every
   # peer that connects is a trusted proxy whose X-Forwarded-For carries the real client IP.
   FORWARDED_ALLOW_IPS: "*"
