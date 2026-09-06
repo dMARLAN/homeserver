@@ -23,7 +23,13 @@ if [ ! -e "${repo_dir}/.git" ]; then
     usage
 fi
 
-cd "${repo_dir}"
+# Build from the committed tree, not the working copy: the checkout doubles as a dev
+# workspace and can hold half-finished edits when a deploy is kicked off.
+export_dir="$(mktemp -d)"
+trap 'rm -rf "${export_dir}"' EXIT
+git -C "${repo_dir}" archive HEAD | tar -x -C "${export_dir}"
+echo "==> Building from $(git -C "${repo_dir}" rev-parse --short HEAD) ($(git -C "${repo_dir}" log -1 --format=%s))"
+cd "${export_dir}"
 
 echo "==> Building wedding-api:prod..."
 docker build -f src/api/dockerfiles/base.Dockerfile -t wedding-api:prod .
