@@ -1,0 +1,19 @@
+# Traefik 3 closes any request whose body has not fully arrived within 60s (respondingTimeouts.readTimeout
+# default). Guests upload up to 100 MB photos over mobile connections and admins upload unbounded files, so
+# the read timeout is disabled on both entry points; write/idle timeouts keep their defaults.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      web:
+        transport:
+          respondingTimeouts:
+            readTimeout: 0
+      websecure:
+        transport:
+          respondingTimeouts:
+            readTimeout: 0
