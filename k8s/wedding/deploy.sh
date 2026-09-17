@@ -46,6 +46,7 @@ ${KUBECTL} apply -f api/service.yaml
 ${KUBECTL} apply -f frontend/deployment.yaml
 ${KUBECTL} apply -f frontend/service.yaml
 
+${KUBECTL} apply -f redirect-https.yaml
 ${KUBECTL} apply -f ingress.yaml
 ${KUBECTL} apply -f traefik-timeouts.yaml
 ${KUBECTL} apply -f backup/cronjob.yaml

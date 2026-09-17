@@ -1,0 +1,14 @@
+# Send plain-http visitors to https. Traefik terminates TLS, so requests that
+# already arrived over https have scheme https and pass through untouched.
+# cert-manager's ACME HTTP-01 solver creates its own Ingress for
+# /.well-known/acme-challenge without this middleware; its longer path wins
+# router priority, so certificate renewals keep working over port 80.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: wedding
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true

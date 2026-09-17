@@ -5,6 +5,8 @@ metadata:
   namespace: wedding
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    # <namespace>-<middleware>@kubernetescrd; defined in redirect-https.yaml
+    traefik.ingress.kubernetes.io/router.middlewares: wedding-redirect-https@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
